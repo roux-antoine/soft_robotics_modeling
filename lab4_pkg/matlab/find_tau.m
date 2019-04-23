@@ -8,7 +8,7 @@ function [tau] = find_tau(u, t, alpha, gamma, tau0, dtau0)
 %   dtau0 is the initial jerk (probably zero)
 
 tau = zeros(size(t));
-tau_ode_0 = [tau0; dtau0];
+tau_ode_0 = [tau0;dtau0];
 tau(1) = tau_ode_0(1);
 
 for index = 2:numel(t)

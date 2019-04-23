@@ -14,6 +14,8 @@ q(1) = q_ode_0(1);
 for index = 2:numel(t)
     q_ode_dynamics = @(time, q_ode) dynamics_gen(q_ode(1),q_ode(2),K,D,tau(index));
 
+    
+    
     [~, q_out] = ode45(q_ode_dynamics, [t(index-1), t(index)], q_ode_0);
     
     q(index) = q_out(end, 1);

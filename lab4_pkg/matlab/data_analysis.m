@@ -43,7 +43,7 @@ clc
 
 %% Load CSV
 
-data = importdata('our_data/flex_150.csv', 2, 250);
+data = importdata('our_data/flex_150.csv', 2, 240);
 
 u = data.left_pwm; %or maybe right
 t = data.time;
@@ -86,9 +86,19 @@ for i = 1:length(y)
         q = q1;
     elseif q2size(1) == 1
         q = q2;
+    else
+        disp('SOMETHING WENT WRONG')
     end
     qs = [qs, q];
 end
+
+save('all_mess.mat')
+
+disp('Generation of q finished')
+
+% load('all_mess.mat')
+
+qs = double(qs); % had to add that to get the ode45 to work in later stages
 
 % plot(t, qs*180/3.14)
 
@@ -104,6 +114,8 @@ tau0 = 0;  % according to the documentation of find_tau
 dtau0 = 0; % according to the documentation of find_tau
 
 cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
+
+disp('Solving the non linear least squares')
 
 X0 = [2.6, 0.5, 0.31, 0.6];
 [X, resnorm] = lsqnonlin(cost, X0);
