@@ -75,17 +75,12 @@ class DataRecorder():
         """
         Script to command soft finger.  You can send commands to both fingers, but only the right is attached.
         """
-        # self.cmd_pub.publish(SoftGripperCmd(pwm_value,0))
-        # rospy.sleep(3)
-        # self.cmd_pub.publish(SoftGripperCmd(0,0))
-        # rospy.sleep(3)
-        # self.shutdown()
+        self.cmd_pub.publish(SoftGripperCmd(pwm_value,0))
+        rospy.sleep(3)
+        self.cmd_pub.publish(SoftGripperCmd(0,0))
+        rospy.sleep(3)
+        self.shutdown()
 
-        while True:
-            self.cmd_pub.publish(SoftGripperCmd(pwm_value,0))
-            rospy.sleep(3)
-            self.cmd_pub.publish(SoftGripperCmd(0,0))
-            rospy.sleep(3)
 
     def shutdown(self):
         """
