@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import csv
 import os
+import sys
 
 import rospy
 from lab4_pkg.msg import SoftGripperState, SoftGripperCmd
@@ -69,15 +70,22 @@ class DataRecorder():
         # df.to_csv(filename)
         df.to_csv(self.run_name)
 
+
     def record_data(self, pwm_value):
         """
         Script to command soft finger.  You can send commands to both fingers, but only the right is attached.
         """
-        self.cmd_pub.publish(SoftGripperCmd(pwm_value,pwm_value))
-        rospy.sleep(3)
-        self.cmd_pub.publish(SoftGripperCmd(0,0))
-        rospy.sleep(3)
-        self.shutdown()
+        # self.cmd_pub.publish(SoftGripperCmd(pwm_value,0))
+        # rospy.sleep(3)
+        # self.cmd_pub.publish(SoftGripperCmd(0,0))
+        # rospy.sleep(3)
+        # self.shutdown()
+
+        while True:
+            self.cmd_pub.publish(SoftGripperCmd(pwm_value,0))
+            rospy.sleep(3)
+            self.cmd_pub.publish(SoftGripperCmd(0,0))
+            rospy.sleep(3)
 
     def shutdown(self):
         """
@@ -87,7 +95,22 @@ class DataRecorder():
         self.flush()
 
 if __name__ == '__main__':
-    pwm_value = 260
+    pwm_value = 255
     rospy.init_node('data_recorder')
-    dr = DataRecorder('../data/flex_'+ str(pwm_value) +'.csv')
-    dr.record_data(pwm_value)
+    if len(sys.argv) == 2:
+        pwm_value = int(sys.argv[1])
+        print('using pwm value {}'.format(pwm_value))
+        
+        dr = DataRecorder('../data/flex_'+ str(pwm_value) +'.csv')
+        dr.record_data(pwm_value)
+    # else:
+    #     for j in np.linspace(0, 200, 3):
+
+    #         pwm_value = int(j)
+    #         for i in range(1):
+    #             print('using pwm value {}'.format(pwm_value))
+                
+    #             dr = DataRecorder('../data/flex_'+ str(pwm_value) + '_' + str(i) + '.csv')
+    #             dr.record_data(pwm_value)
+    #             print(dr.states)
+    #             del dr
