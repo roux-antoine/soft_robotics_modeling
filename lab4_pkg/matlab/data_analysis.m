@@ -43,7 +43,7 @@ clc
 
 %% Load CSV
 
-data = importdata('our_data/flex_80_1.csv', 5, 100);
+data = importdata('our_data/flex_160_3.csv', 5, 100);
 
 u = data.left_pwm; %or maybe right
 t = data.time;
@@ -87,7 +87,8 @@ for i = 1:length(y)
     elseif q2size(1) == 1
         q = q2;
     else
-        disp('SOMETHING WENT WRONG')
+        q = qs(end);
+        disp('Something went wrong');
     end
     qs = [qs, q];
 end
@@ -118,7 +119,7 @@ cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0)
 disp('Solving the non linear least squares')
 
 X0 = [2.6, 0.5, 0.31, 0.6];
-[X, resnorm] = lsqnonlin(cost, X0);
+[X, resnorm] = lsqnonlin(cost, X0)
 % [X, resnorm] = lsqnonlin(cost, [K, D, alpha, gamma])
 
 
