@@ -43,7 +43,7 @@ clc
 
 %% Load CSV
 
-data = importdata('our_data/flex_150.csv', 2, 240);
+data = importdata('our_data/flex_80_1.csv', 5, 100);
 
 u = data.left_pwm; %or maybe right
 t = data.time;
@@ -100,7 +100,7 @@ disp('Generation of q finished')
 
 qs = double(qs); % had to add that to get the ode45 to work in later stages
 
-% plot(t, qs*180/3.14)
+plot(t, qs*180/3.14)
 
 
 
@@ -122,4 +122,4 @@ X0 = [2.6, 0.5, 0.31, 0.6];
 % [X, resnorm] = lsqnonlin(cost, [K, D, alpha, gamma])
 
 
-
+%%%%%%%%%%%%%
