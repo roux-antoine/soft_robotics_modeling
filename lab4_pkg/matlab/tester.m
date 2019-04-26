@@ -59,26 +59,52 @@ disp('Generation of q finished')
 qs = double(qs); % had to add that to get the ode45 to work in later stages
 
 %%%%%%%
+hyperelastic_model = 1;
+if hyperelastic_model == 0
+    alpha = 0.009;
+    gamma = 0.2;
+    t = 0:(3/length(qs)):3;
+    u = 160*ones(size(t));
+    tau0 = 0;
+    dtau0 = 0;
+    tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
 
-alpha = 0.009;
-gamma = 0.2;
-t = 0:(3/length(qs)):3;
-u = 160*ones(size(t));
-tau0 = 0;
-dtau0 = 0;
-tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
+
+    K = 0.075;
+    D = 0.0027;
+    q0 = 0;
+    dq0 = 0;
+    q = find_q(tau, t, K, D, q0, dq0);
+
+    hold on
+    p1 = plot(qs*180/3.14);
+    p2 = plot(q);
+    xlabel('timestep')
+    ylabel('bend angle (degrees)');
+    title('Evolution of bend angle for a step input');
+    hold off
+else
+    alpha = 0.009;
+    gamma = 0.27;
+    t = 0:(3/length(qs)):3;
+    u = 160*ones(size(t));
+    tau0 = 0;
+    dtau0 = 0;
+    tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
 
 
-K = 0.075;
-D = 0.0027;
-q0 = 0;
-dq0 = 0;
-q = find_q(tau, t, K, D, q0, dq0);
+    D = 0.0027;
+    C1 = 9.7768;
+    C2 =  9.8086;
+    q0 = 0;
+    dq0 = 0;
+    q = find_q_hyperelastic(tau, t, C1, C2, D, q0, dq0);
 
-hold on
-p1 = plot(qs*180/3.14);
-p2 = plot(q);
-xlabel('timestep')
-ylabel('bend angle (degrees)');
-title('Evolution of bend angle for a step input');
-hold off
+    hold on
+    p1 = plot(qs*180/3.14);
+    p2 = plot(q);
+    xlabel('timestep')
+    ylabel('bend angle (degrees)');
+    title('Evolution of bend angle for a step input');
+    hold off
+end

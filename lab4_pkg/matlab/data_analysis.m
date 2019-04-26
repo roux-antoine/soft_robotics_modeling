@@ -43,7 +43,7 @@ clc
 
 %% Load CSV
 
-data = importdata('our_data/flex_160_3.csv', 5, 100);
+data = importdata('our_data/flex_200_3.csv', 5, 100);
 
 u = data.left_pwm; %or maybe right
 t = data.time;
@@ -114,13 +114,26 @@ dq0 = 0;
 tau0 = 0;  % according to the documentation of find_tau
 dtau0 = 0; % according to the documentation of find_tau
 
-cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
+hyperelastic = 1;
+if hyperelastic == 0
+    cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
+    X0 = [2.6, 0.5, 0.31, 0.6];
+    [X, resnorm] = lsqnonlin(cost, X0)
+else
+    D = 0.027;
+    alpha = 0.095;
+    gamma = 0.27;
+    cost = @(x) cost_function_hyperelastic(x(1), x(2), D, alpha, gamma, t, u, q, q0, dq0, tau0, dtau0);
+    X0 = [2, 2]; %C1, C2
+    % IDEA: we can maybe reduce the number of variables by hardcoding the
+    % ones found with the other model
+    [X, resnorm] = lsqnonlin(cost, X0, [0,0], [Inf, Inf])
+end
+
+
 
 disp('Solving the non linear least squares')
 
-X0 = [2.6, 0.5, 0.31, 0.6];
-[X, resnorm] = lsqnonlin(cost, X0)
-% [X, resnorm] = lsqnonlin(cost, [K, D, alpha, gamma])
 
 
 %%%%%%%%%%%%%
