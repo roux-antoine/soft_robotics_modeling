@@ -1,6 +1,6 @@
 
 
-data = importdata('our_data/flex_80_1.csv', 5, 100); %CHANGE ALSO u LINE 68!!
+data = importdata('our_data/flex_160_3.csv', 5, 100); %CHANGE ALSO u LINE 68!!
 
 u = data.left_pwm; %or maybe right
 t = data.time;
@@ -36,38 +36,28 @@ for i = 1:length(y)
     end
 end
 
-% qs = qs - qs(1); %'normalizing' the values so that we start at an angle of zero
-
 
 disp('Generation of q finished')
 
 % load('all_mess.mat')
 
+qs = double(qs); % had to add that to get the ode45 to work in later stages
+
 %%%%%%%
 hyperelastic_model = 0;
 if hyperelastic_model == 0
-    
-    %%%
-    K = 0.0730;
-    D = 0.0005;
-    alpha = 0.0048;
-    gamma = 0.1813;
-    %%%
-    
-    
-    %alpha = 0.009;
-    %gamma = 0.2;
+    alpha = 0.009;
+    gamma = 0.2;
     t = 0:(3/length(qs)):3;
-    u = 80*ones(size(t));
+    u = 160*ones(size(t));
     tau0 = 0;
     dtau0 = 0;
     tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
 
 
-    %K = 0.075;
+    K = 0.075;
+    D = 0.00008;
     % D = 0.0027;
-    
-
     
     
     q0 = 0;
