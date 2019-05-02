@@ -1,6 +1,6 @@
 
 
-data = importdata('our_data/flex_160_3.csv', 5, 100); %CHANGE ALSO u LINE 68!!
+data = importdata('our_data/flex_80_1.csv', 5, 100); %CHANGE ALSO u LINE 68!!
 
 u = data.left_pwm; %or maybe right
 t = data.time;
@@ -21,60 +21,60 @@ y = data.tip_pos_y - data.base_pos_y;
 
 L = 251; %seems like the correct value
 qs = [];
-q1s = [];
-q2s = [];
 for i = 1:length(y)
     i
     syms q1;
     % Using the equation: y = L * (1-cos(q))/q)
     q1 = vpasolve(y(i) == L*(1-cos(q1))/q1, q1, [0, 3.14/2]);
-    
-    syms q2;
-    % Using the equation: x = L * sin(q)/q
-    q2 = vpasolve(y(i) == L*sin(q2)/q2, q2, [0, 3.14/2]);
-    
-    q = 0;
     q1size = size(q1);
-    q2size = size(q2);
-    
-    if (q1size(1) == 1) && (q2size(1) == 1)
-        q = (q1 + q2) / 2;
-    elseif q1size(1) == 1
-        q = q1;
-    elseif q2size(1) == 1
-        q = q2;
+        
+    if (q1size(1) == 1)
+        qs = [qs, double(q1)];
     else
-        q = qs(end);
-        disp('Something went wrong');
+        qs = [qs, qs(end)];
+        disp('WARNING: Solver could not find q...');
     end
-    qs = [qs, q];
 end
 
-save('all_mess.mat')
+% qs = qs - qs(1); %'normalizing' the values so that we start at an angle of zero
+
 
 disp('Generation of q finished')
 
 % load('all_mess.mat')
 
-qs = double(qs); % had to add that to get the ode45 to work in later stages
-
 %%%%%%%
-hyperelastic_model = 1;
+hyperelastic_model = 0;
 if hyperelastic_model == 0
-    alpha = 0.009;
-    gamma = 0.2;
+    
+    %%%
+    K = 0.0730;
+    D = 0.0005;
+    alpha = 0.0048;
+    gamma = 0.1813;
+    %%%
+    
+    
+    %alpha = 0.009;
+    %gamma = 0.2;
     t = 0:(3/length(qs)):3;
-    u = 160*ones(size(t));
+    u = 80*ones(size(t));
     tau0 = 0;
     dtau0 = 0;
     tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
 
 
-    K = 0.075;
-    D = 0.0027;
+    %K = 0.075;
+    % D = 0.0027;
+    
+
+    
+    
     q0 = 0;
     dq0 = 0;
     q = find_q(tau, t, K, D, q0, dq0);
+    
+
 
     hold on
     p1 = plot(qs*180/3.14);
@@ -94,8 +94,8 @@ else
 
 
     D = 0.0027;
-    C1 = 9.7768;
-    C2 =  9.8086;
+    C1 = 0.11;
+    C2 =  0.02;
     q0 = 0;
     dq0 = 0;
     q = find_q_hyperelastic(tau, t, C1, C2, D, q0, dq0);

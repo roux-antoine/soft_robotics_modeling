@@ -43,14 +43,14 @@ clc
 
 %% Load CSV
 
-data = importdata('our_data/flex_200_3.csv', 5, 100);
+data = importdata('our_data/flex_100_0.csv', 2, 100);
 
-u = data.left_pwm; %or maybe right
+u = data.left_pwm;
 t = data.time;
 
 x = data.tip_pos_x - data.base_pos_x;
 y = data.tip_pos_y - data.base_pos_y;
-% they probably need some filtering...
+% they maybe need some filtering...
 
 
 % plot(t,x);
@@ -60,48 +60,32 @@ y = data.tip_pos_y - data.base_pos_y;
 %% Generate q(t)
 
 % we have to generate q (also called q_m in the lab document)
-% do some trigonometry using x and y and other stuff
 
 L = 251; %seems like the correct value
 qs = [];
-q1s = [];
-q2s = [];
 for i = 1:length(y)
     i
     syms q1;
     % Using the equation: y = L * (1-cos(q))/q)
     q1 = vpasolve(y(i) == L*(1-cos(q1))/q1, q1, [0, 3.14/2]);
-    
-    syms q2;
-    % Using the equation: x = L * sin(q)/q
-    q2 = vpasolve(y(i) == L*sin(q2)/q2, q2, [0, 3.14/2]);
-    
-    q = 0;
     q1size = size(q1);
-    q2size = size(q2);
-    
-    if (q1size(1) == 1) && (q2size(1) == 1)
-        q = (q1 + q2) / 2;
-    elseif q1size(1) == 1
-        q = q1;
-    elseif q2size(1) == 1
-        q = q2;
+        
+    if (q1size(1) == 1)
+        qs = [qs, double(q1)];
     else
-        q = qs(end);
-        disp('Something went wrong');
+        qs = [qs, qs(end)];
+        disp('WARNING: Solver could not find q...');
     end
-    qs = [qs, q];
 end
 
-save('all_mess.mat')
+%qs = qs - qs(1); %'normalizing' the values so that we start at an angle of zero
 
 disp('Generation of q finished')
 
-% load('all_mess.mat')
 
-qs = double(qs); % had to add that to get the ode45 to work in later stages
-
+hold on
 plot(t, qs*180/3.14)
+hold off
 
 
 
@@ -114,10 +98,11 @@ dq0 = 0;
 tau0 = 0;  % according to the documentation of find_tau
 dtau0 = 0; % according to the documentation of find_tau
 
-hyperelastic = 1;
+hyperelastic = 0;
 if hyperelastic == 0
     cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
-    X0 = [2.6, 0.5, 0.31, 0.6];
+    %X0 = [2.6, 0.5, 0.31, 0.6];
+    X0 = [0.075, 0.0027, 0.009, 0.2];
     [X, resnorm] = lsqnonlin(cost, X0)
 else
     D = 0.027;
