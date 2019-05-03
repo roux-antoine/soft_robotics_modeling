@@ -7,50 +7,17 @@ clc
 cur = pwd;
 addpath( genpath( [cur, '/gen/' ] ));
 
-% %% testing with generated data
-% % Note the values used are totally made up and shouldn't be used as
-% % starting points for your actual analysis
-% 
-% alpha = 0.1;
-% gamma = 0.5;
-% t = 0:0.01:2;
-% u = 150*ones(size(t));
-% tau0 = 0;
-% dtau0 = 0;
-% tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
-% 
-% K = 3;
-% D = 0.4;
-% q0 = 0;
-% dq0 = 0;
-% q = find_q(tau, t, K, D, q0, dq0);
-% 
-% 
-% % x = K, D, alpha, gamma
-% 
-% cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
-% 
-% 
-% [X, resnorm] = lsqnonlin(cost, [2.6, 0.5, 0.31, 0.6])
-% % [X, resnorm] = lsqnonlin(cost, [K, D, alpha, gamma])
-
-
-%% 
-
-clear all
-close all
-clc
-
 %% Load CSV
 
-data = importdata('../data/sys_id/flex_80_0.csv', 2, 100);
+
+data = importdata('../data/sys_id/flex_80_0.csv', 2, 95);
 
 u = data.left_pwm;
 t = data.time;
 
 x = data.tip_pos_x - data.base_pos_x;
 y = data.tip_pos_y - data.base_pos_y;
-% they maybe need some filtering...
+pressure = data.left_pressure;
 
 hold on
 plot(t,x);
@@ -62,23 +29,9 @@ hold off
 
 % we have to generate q (also called q_m in the lab document)
 
-L = 251; %seems like the correct value
 qs = [];
 for i = 1:length(y)
-    i
-    syms q1;
-    % Using the equation: y = L * (1-cos(q))/q)
-    % q1 = vpasolve(y(i) == L*(1-cos(q1))/q1, q1, [0, 3.14/2]);
-    q1 = vpasolve(x(i) == L*(sin(q1))/q1, q1, [0, 3.14/2]);
-    
-    q1size = size(q1);
-        
-    if (q1size(1) == 1)
-        qs = [qs, double(q1)];
-    else
-        qs = [qs, qs(end)];
-        disp('WARNING: Solver could not find q...');
-    end
+    qs = [qs, 2*atan(x(i) / y(i))];
 end
 
 %qs = qs - qs(1); %'normalizing' the values so that we start at an angle of zero
@@ -101,26 +54,28 @@ dq0 = 0;
 tau0 = 0;  % according to the documentation of find_tau
 dtau0 = 0; % according to the documentation of find_tau
 
-hyperelastic = 0;
+hyperelastic = 1;
 if hyperelastic == 0
     cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
     %X0 = [2.6, 0.5, 0.31, 0.6];
-    X0 = [0.075, 0.0027, 0.009, 0.2];
+
+    X0 = [0.6808,  0.0019, 0.0034, 0.01];
     [X, resnorm] = lsqnonlin(cost, X0)
 else
     D = 0.027;
     alpha = 0.095;
     gamma = 0.27;
     cost = @(x) cost_function_hyperelastic(x(1), x(2), D, alpha, gamma, t, u, q, q0, dq0, tau0, dtau0);
-    X0 = [2, 2]; %C1, C2
-    % IDEA: we can maybe reduce the number of variables by hardcoding the
-    % ones found with the other model
+    X0 = [0.11, 0.02]; %C1, C2
     [X, resnorm] = lsqnonlin(cost, X0, [0,0], [Inf, Inf])
 end
 
 
+cost = @(x) cost_function_proportional(x(1), x(2), t, u, tau0, dtau0, tau); alpha, gamma, t, u, tau0, dtau0, tau_measured)
+X0 = [0.11, 0.02]; %C1, C2
+[X, resnorm] = lsqnonlin(cost, X0, [0,0], [Inf, Inf])
 
-disp('Solving the non linear least squares')
+disp('Solved the non linear least squares')
 
 
 

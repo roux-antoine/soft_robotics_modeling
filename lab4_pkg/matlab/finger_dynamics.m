@@ -47,8 +47,7 @@ PE = m*g'*p_com;
 %% Dynamics
 
 [M, C, G, B] = LagrangianDynamics(KE, PE, q, dq, q);
-M
-C
+
 
 %% Augmented Dynamics
 

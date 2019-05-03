@@ -7,24 +7,17 @@ clc
 cur = pwd;
 addpath( genpath( [cur, '/gen/' ] ));
 
-
-%% 
-
-clear all
-close all
-clc
-
 %% Load CSV
 
 
-data = importdata('../data/sys_id/flex_80_0.csv', 2, 100);
+data = importdata('../data/sys_id/flex_200_0.csv', 2, 95);
 
 u = data.left_pwm;
 t = data.time;
 
 x = data.tip_pos_x - data.base_pos_x;
 y = data.tip_pos_y - data.base_pos_y;
-% they maybe need some filtering...
+pressure = data.left_pressure - min(data.left_pressure);
 
 hold on
 plot(t,x);
@@ -61,26 +54,30 @@ dq0 = 0;
 tau0 = 0;  % according to the documentation of find_tau
 dtau0 = 0; % according to the documentation of find_tau
 
-hyperelastic = 0;
-if hyperelastic == 0
+model = 1;
+if model == 0 % ie the classical model
     cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
-    %X0 = [2.6, 0.5, 0.31, 0.6];
-    X0 = [0.075, 0.0027, 0.009, 0.2];
-    [X, resnorm] = lsqnonlin(cost, X0)
-else
+    X0 = [0.6808,  0.0019, 0.0034, 0.01];
+    [X, resnorm] = lsqnonlin(cost, X0) % K, D, alpha, gamma
+elseif model == 1 %ie hyperelastic
     D = 0.027;
     alpha = 0.095;
     gamma = 0.27;
     cost = @(x) cost_function_hyperelastic(x(1), x(2), D, alpha, gamma, t, u, q, q0, dq0, tau0, dtau0);
-    X0 = [2, 2]; %C1, C2
-    % IDEA: we can maybe reduce the number of variables by hardcoding the
-    % ones found with the other model
+    X0 = [0.11, 0.02]; %C1, C2
+    [X, resnorm] = lsqnonlin(cost, X0, [0,0], [Inf, Inf])
+else
+    cost = @(x) cost_function_proportional(x(1), x(2), t, u, tau0, dtau0, pressure);
+    X0 = [2, 2]; %alpha, gamma
     [X, resnorm] = lsqnonlin(cost, X0, [0,0], [Inf, Inf])
 end
 
 
+%% try to fit a second order model for the pressure
 
-disp('Solving the non linear least squares')
+
+
+disp('Solved the non linear least squares')
 
 
 
