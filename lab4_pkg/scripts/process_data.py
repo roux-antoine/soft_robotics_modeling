@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import sys
 
 
-filename = '../data/sys_id/flex_80_1.csv'
+filename = '../data/sys_id/flex_80_0.csv'
 
 
 if len(sys.argv) == 2:
@@ -23,6 +23,9 @@ plt.plot(df['time'], df['left_pwm'], label='left_pwm')
 plt.plot(df['time'], df['left_pressure'], label='left_pressure')
 plt.plot(df['time'], df['left_flex'], label='left_flex')
 plt.plot(df['time'], df['tip_pos_x'] - df['base_pos_x'], label='pos_x')
+plt.plot(df['time'], df['base_pos_x'], label='base_x')
+plt.plot(df['time'], df['base_pos_y'], label='base_y')
+
 plt.plot(df['time'], df['tip_pos_y'] - df['base_pos_y'], label='pos_y')
 # plt.plot(df['time'], df['right_pwm'], label='right_pwm')
 # plt.plot(df['time'], df['right_pressure'], label='right_pressure')

@@ -10,6 +10,9 @@ syms q dq ddq real
 % Parameters
 m = 0.05; % This is made up for now
 g = [9.81; 0; 0]; % The x axis points down
+% g = [0; 9.81; 0]; % The y axis points down
+
+
 L = 0.084; % 8.4 cm
 
 % Initial conditions
@@ -65,7 +68,7 @@ syms C1 C2 real
 
 lambda = q/sin(q);
 sigma = ((lambda^4 - 1)/ lambda^3)*(2*C1 + 4*C2*(lambda - 1/lambda)^2);
-K2 = sigma/lambda;
+K2 = sigma/(lambda-1);
 
 fs2 = [dq; -M\(C + D)*dq - M\(G + K2*q)];
 dynamics2 = fs2 + gs*Tau;
