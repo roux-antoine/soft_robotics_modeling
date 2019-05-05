@@ -10,7 +10,7 @@ addpath( genpath( [cur, '/gen/' ] ));
 %% Load CSV
 
 
-data = importdata('../data/sys_id/flex_200_0.csv', 2, 95);
+data = importdata('../data/sys_id/flex_200_3.csv', 2, 95);
 
 u = data.left_pwm;
 t = data.time;
@@ -56,13 +56,19 @@ dtau0 = 0; % according to the documentation of find_tau
 
 model = 1;
 if model == 0 % ie the classical model
-    cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
-    X0 = [0.6808,  0.0019, 0.0034, 0.01];
+    
+    alpha = 0.3074; 
+    gamma = 0.1139;
+    
+    % cost = @(x) cost_function(x(1), x(2), x(3), x(4), t, u, q, q0, dq0, tau0, dtau0);
+    cost = @(x) cost_function(x(1), x(2), alpha, gamma, t, u, q, q0, dq0, tau0, dtau0);
+    
+    X0 = [55,  0.5];
     [X, resnorm] = lsqnonlin(cost, X0) % K, D, alpha, gamma
 elseif model == 1 %ie hyperelastic
-    D = 0.027;
-    alpha = 0.095;
-    gamma = 0.27;
+    D = 0.4856;
+    alpha = 0.3074; 
+    gamma = 0.1139;
     cost = @(x) cost_function_hyperelastic(x(1), x(2), D, alpha, gamma, t, u, q, q0, dq0, tau0, dtau0);
     X0 = [0.11, 0.02]; %C1, C2
     [X, resnorm] = lsqnonlin(cost, X0, [0,0], [Inf, Inf])

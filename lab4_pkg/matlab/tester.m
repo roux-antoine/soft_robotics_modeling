@@ -1,4 +1,4 @@
-
+clc
 
 data = importdata('our_data/flex_80_0.csv', 7, 100); %CHANGE ALSO u LINE 68!!
 
@@ -34,26 +34,28 @@ disp('Generation of q finished')
 % load('all_mess.mat')
 
 %%%%%%%
-model = 2;
+model = 0;
 if model == 0
     
     %%%
-    K = 0.6908	;
-    D = 0.0019;
-    alpha = 0.0036 ;
-    gamma = 0.0308; %0.0308  ;
+    K = 55.8973;
+    D = 0.4856;
+    alpha = 0.3074; 
+    gamma = 0.1139;
     %%%
     
     t = 0:(3/length(qs)):3;
     u = 80*ones(size(t));
     tau0 = 0;
     dtau0 = 0;
+    start = cputime;
+    
     tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
     
     q0 = 0;
     dq0 = 0;
     q = find_q(tau, t, K, D, q0, dq0);
-   
+    cputime - start
 
     hold on
     p1 = plot(qs);
@@ -62,6 +64,7 @@ if model == 0
     ylabel('bend angle (radians)');
     title('Evolution of bend angle for a step input');
     hold off
+    
 elseif model == 1
     alpha = 0.0036 ;
     gamma = 0.0308;
@@ -79,7 +82,6 @@ elseif model == 1
     q0 = 0;
     dq0 = 0;
     q = find_q_hyperelastic(tau, t, C1, C2, D, q0, dq0);
-
     hold on
     p1 = plot(qs*180/3.14);
     p2 = plot(q);
@@ -97,13 +99,18 @@ else
     
     tau0 = 0;
     dtau0 = 0;
-    tau = find_tau(u, t, alpha, gamma, tau0, dtau0);
+    start = cputime;
+
+    tau1 = find_tau(u, t, alpha, gamma, tau0, dtau0);
     
-    q = A * tau;
+    q = A * tau1;
+    
+    %tau = alpha * (1 - (1+t./gamma).* exp(-t./gamma));
+    cputime - start
     
     hold on
-    p1 = plot(qs);
-    p2 = plot(q);
+    plot(qs);
+    plot(q);
     xlabel('timestep')
     ylabel('bend angle (radians)');
     title('Evolution of bend angle for a step input');
